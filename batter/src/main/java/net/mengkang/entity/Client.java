@@ -16,6 +16,7 @@ public class Client {
     private Channel channel;
     private String username;
     private Integer hp;
+    private String userInfo;
 
 
 
@@ -61,4 +62,11 @@ public class Client {
     }
 
 
+    public String getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(String userInfo) {
+        this.userInfo = userInfo;
+    }
 }

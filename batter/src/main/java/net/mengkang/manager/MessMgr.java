@@ -24,7 +24,9 @@ public class MessMgr {
                 Double x = (Double) json.get("x");
                 Double y = (Double) json.get("y");
                 Double direction = (Double) json.get("direction");
-                ClientMgr.sendMoveMessage(cid,x,y,direction);
+                String userInfo = (String) json.get("userInfo");
+
+                ClientMgr.sendMoveMessage(cid,x,y,direction,userInfo);
                 return;
             }
             case 10002:{

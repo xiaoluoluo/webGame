@@ -33,11 +33,12 @@ public class ClientMgr {
         JSONObject json = new JSONObject(requestString);
         String userName= (String) json.get("user");
         Integer hp = (Integer) json.get("hp");
-//        Float direction = (Float) json.get("direction");
+        String userInfo= (String) json.get("userInfo");
 
         Client newClient = new Client();
         newClient.setClientId(channel.id().asLongText());
         newClient.setUsername(userName);
+        newClient.setUserInfo(userInfo);
         newClient.setHp(hp);
         newClient.setChannel(channel);
         return newClient;
@@ -94,15 +95,15 @@ public class ClientMgr {
     }
 
 
-    public static void sendMoveMessage(String  clientId,Double x,Double y,Double direction){
-
+    public static void sendMoveMessage(String  clientId,Double x,Double y,Double direction,String userInfo){
         for (String cId :allClient.keySet()){
             if (cId.equals(clientId)){
+                allClient.get(clientId).setUserInfo(userInfo);
                 continue;
             }
             Client c = allClient.get(cId);
             if (c != null){
-                sendMoveMessageToClient(c.getChannel(),moveToString(clientId,x,y,direction));
+                sendMoveMessageToClient(c.getChannel(),moveToString(clientId,x,y,direction,userInfo));
             }
         }
     }
@@ -158,12 +159,14 @@ public class ClientMgr {
 
 
 
-    public static String  moveToString(String  clientId,Double x,Double y,Double direction){
+    public static String  moveToString(String  clientId,Double x,Double y,Double direction,String userInfo){
         JSONObject clientObject = new JSONObject();
         clientObject.put("clientId",clientId);
         clientObject.put("x",x);
         clientObject.put("y",y);
         clientObject.put("direction",direction);
+        clientObject.put("userInfo",userInfo);
+
 
         return clientObject.toString();
     }
@@ -173,6 +176,8 @@ public class ClientMgr {
         JSONObject clientObject = new JSONObject();
         clientObject.put("userName",client.getUsername());
         clientObject.put("id",client.getClientId());
+        clientObject.put("userInfo",client.getUserInfo());
+
         return clientObject.toString();
     }
 
