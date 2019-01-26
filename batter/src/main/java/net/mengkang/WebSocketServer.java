@@ -16,7 +16,7 @@ public final class WebSocketServer {
     public static void main(String[] args) throws Exception {
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(10);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
