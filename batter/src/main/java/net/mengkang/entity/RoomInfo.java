@@ -2,85 +2,45 @@ package net.mengkang.entity;
 
 import io.netty.channel.Channel;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Created by luoxiaosong on 2018/3/3.
  */
 public class RoomInfo {
 
-    private long roomId;
-    private String grade;
-    private String studentName;
-    private String subject;
-    private String info;
-    private String starClassTime;
+    private static final int roomUserNum = 4;
+
+    //<cid,Client>
+    private Map<String,Client> clientMap = new ConcurrentHashMap<String, Client>(roomUserNum);
 
 
-    private Channel teacherChannel;
+    private int roomId;
 
-    private Channel studentChannel;
 
-    public long getRoomId() {
+
+    public int getRoomId() {
         return roomId;
     }
 
-    public void setRoomId(long roomId) {
+    public void setRoomId(int roomId) {
         this.roomId = roomId;
     }
 
-    public String getGrade() {
-        return grade;
+    public  Map<String,Client > getClientMap() {
+        return clientMap;
     }
 
-    public void setGrade(String grade) {
-        this.grade = grade;
+    public boolean isNumMax (){
+        return clientMap.size() > roomUserNum;
     }
 
-    public String getStudentname() {
-        return studentName;
+    public boolean isEmpty (){
+        return clientMap.isEmpty();
     }
 
-    public void setStudentname(String studentname) {
-        this.studentName = studentname;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
-    }
-    public void setStarClassTime(String starClassTime) {
-        this.starClassTime = starClassTime;
-    }
-
-    public String getStarClassTime() {
-        return starClassTime;
-    }
-
-
-    public Channel getStudentChannel() {
-        return studentChannel;
-    }
-
-    public void setStudentChannel(Channel studentChannel) {
-        this.studentChannel = studentChannel;
-    }
-
-    public Channel getTeacherChannel() {
-        return teacherChannel;
-    }
-
-    public void setTeacherChannel(Channel teacherChannel) {
-        this.teacherChannel = teacherChannel;
-    }
 
 }

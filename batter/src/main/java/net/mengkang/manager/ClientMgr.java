@@ -1,13 +1,10 @@
 package net.mengkang.manager;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import net.mengkang.entity.Client;
-import net.mengkang.service.BaseService;
+import net.mengkang.entity.RoomInfo;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,14 +13,33 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ClientMgr {
 
-    private static Map<String, Client> allClient = new ConcurrentHashMap<String, Client>();
+    // wxid  roomId
+    private static Map<String, Integer> allWxIdClient = new ConcurrentHashMap<String, Integer>();
+    // cid  roomId
+    private static Map<String, Integer> allCidClient = new ConcurrentHashMap<String, Integer>();
 
-    public static Client getClient(String clientId){
-        return allClient.get(clientId);
-    }
 
     public static void addClient(Client client){
-        allClient.put(client.getClientId(),client);
+
+        int isFriendRoom = 0;
+        RoomInfo roomInfo = ClassRoomMgr.getAbleRoom();
+        // 如果他的来源id 不是为0 那么就取他的来源ID所对应的房间号
+        if (!client.getFromId().equals("0")){
+            Integer rooId = allWxIdClient.get(client.getFromId());
+            if (rooId != null){
+                isFriendRoom = 1;
+                roomInfo = ClassRoomMgr.getRoomInfo(rooId);
+            }
+        }
+        if (roomInfo == null || roomInfo.isNumMax()){
+            isFriendRoom = 0;
+            roomInfo = ClassRoomMgr.createRoom();
+            ClassRoomMgr.getAllRoom().put(roomInfo.getRoomId(),roomInfo);
+        }
+        client.IsFriendRoom(isFriendRoom);
+        roomInfo.getClientMap().put(client.getClientId(),client);
+        allWxIdClient.put(client.getWxId(),roomInfo.getRoomId());
+        allCidClient.put(client.getClientId(),roomInfo.getRoomId());
     }
 
     public static Client createClient(Channel channel,String requestString){
@@ -49,53 +65,49 @@ public class ClientMgr {
     }
 
     public static void removeClient(String clientId){
-        allClient.remove(clientId);
+
+        Integer roomId= allCidClient.get(clientId);
+        if (roomId == null){
+            return;
+        }
+        RoomInfo roomInfo = ClassRoomMgr.getRoomInfo(roomId);
+        if (roomInfo == null) {
+            return;
+        }
+        Client client = roomInfo.getClientMap().get(clientId);
+        if (client == null){
+            return;
+        }
+        roomInfo.getClientMap().remove(clientId);
+        if (roomInfo.isEmpty()){
+            ClassRoomMgr.getAllRoom().remove(roomInfo.getRoomId());
+        }
+        allWxIdClient.remove(client.getWxId());
+        allCidClient.remove(clientId);
     }
 
-
-//    public static void sendMessageToClient(Channel channel, Client client , boolean isFirstEnter){
-//        //进入游戏
-//        String clientString = clientToString(client);
-//        int messageId = ClientCodeEnum.OtherEnterGame.getCode();   // 别人进入游戏了
-//        if (isFirstEnter){
-//            messageId = ClientCodeEnum.MyselfEnterGame.getCode();  // 我进入游戏了
-//        }
-//        String message = MessMgr.createMessage(0,"",messageId, clientString);
-//        channel.writeAndFlush(new TextWebSocketFrame(message));
-//    }
-//
-//    public static void sendMoveMessageToClient(Channel channel, String moveInfo ){
-//        //有人移动
-//        String message = MessMgr.createMessage(0,"",2, moveInfo);
-//        channel.writeAndFlush(new TextWebSocketFrame(message));
-//    }
-//
-//
-//    public static void sendKillOthersMessageToClient(Channel channel, String kissMessage ){
-//        //有人在杀人
-//        String message = MessMgr.createMessage(0,"",3, kissMessage);
-//        channel.writeAndFlush(new TextWebSocketFrame(message));
-//    }
-
-
-
-
-
-
+    //--------------------------------------------------------------------------
 
     public static void sendMessageToAllClient(Channel channel,Client client ){
 
-        for (String clientId :allClient.keySet()){
+        Integer roomId = allCidClient.get(client.getClientId());
+        if (roomId == null){
+            return;
+        }
+        RoomInfo roomInfo = ClassRoomMgr.getRoomInfo(roomId);
+        if (roomInfo == null){
+            return;
+        }
+
+        for (String clientId :roomInfo.getClientMap().keySet()){
             if (clientId.equals(client.getClientId())){
                 continue;
             }
-            Client c = allClient.get(clientId);
+            Client c = roomInfo.getClientMap().get(clientId);
             if (c != null){
                 // 把别人信息发给我
-//                sendMessageToClient(channel,c,false);
                 MessMgr.sendMessageToClient(channel,ClientCodeEnum.OtherEnterGame.getCode(),clientToString(c));
                 //把我信息发给给别人
-//                sendMessageToClient(c.getChannel(),client,false);
                 MessMgr.sendMessageToClient(c.getChannel(),ClientCodeEnum.OtherEnterGame.getCode(),clientToString(client));
             }
         }
@@ -103,12 +115,25 @@ public class ClientMgr {
 
 
     public static void sendMoveMessage(String  clientId,Double x,Double y,Double direction,String userInfo){
-        for (String cId :allClient.keySet()){
+
+
+        Integer roomId = allCidClient.get(clientId);
+        if (roomId == null){
+            return;
+        }
+        RoomInfo roomInfo = ClassRoomMgr.getRoomInfo(roomId);
+        if (roomInfo == null){
+            return;
+        }
+        for (String cId :roomInfo.getClientMap().keySet()){
             if (cId.equals(clientId)){
-                allClient.get(clientId).setUserInfo(userInfo);
+                Client cc = roomInfo.getClientMap().get(clientId);
+                if (cc != null){
+                    cc.setUserInfo(userInfo);
+                }
                 continue;
             }
-            Client c = allClient.get(cId);
+            Client c = roomInfo.getClientMap().get(cId);
             if (c != null){
                 MessMgr.sendMessageToClient(c.getChannel(),ClientCodeEnum.Move.getCode(),moveToString(clientId,x,y,direction,userInfo));
             }
@@ -117,13 +142,22 @@ public class ClientMgr {
 
     public static void sendKillOther(String  clientId,String  targetClientId,Integer hp){
 
-        Client client = allClient.get(clientId);
+        Integer roomId = allCidClient.get(clientId);
+        if (roomId == null){
+            return;
+        }
+        RoomInfo roomInfo = ClassRoomMgr.getRoomInfo(roomId);
+        if (roomInfo == null){
+            return;
+        }
+
+        Client client = roomInfo.getClientMap().get(clientId);
         if (client == null){
             return;
         }
         Integer overHp = 0;
         if (hp > 0){
-            Client targetClient = allClient.get(targetClientId);
+            Client targetClient = roomInfo.getClientMap().get(targetClientId);
             if (targetClient == null){
                 return;
             }
@@ -133,20 +167,19 @@ public class ClientMgr {
             }else {
                 // 广播 目标掉血了
                 targetClient.setHp(overHp);
-//                targetClient.setHp(overHp);
             }
         }else {
             // 没有砍到人
             targetClientId = "";
         }
-        for (String c :allClient.keySet()) {
+        for (String c :roomInfo.getClientMap().keySet()) {
             if (hp <= 0){
                 // 如果是自己空晖一刀  消息不用发给自己
                 if (c.equals(clientId)){
                     continue;
                 }
             }
-            Client cli = allClient.get(c);
+            Client cli = roomInfo.getClientMap().get(c);
             if (cli != null){
                 MessMgr.sendMessageToClient(cli.getChannel(),ClientCodeEnum.Kill.getCode(),killOthersToString(clientId,targetClientId,overHp));
             }
@@ -155,15 +188,25 @@ public class ClientMgr {
 
 
     public static void sendUserSprint(String  clientId){
-        Client client = allClient.get(clientId);
+
+        Integer roomId = allCidClient.get(clientId);
+        if (roomId == null){
+            return;
+        }
+        RoomInfo roomInfo = ClassRoomMgr.getRoomInfo(roomId);
+        if (roomInfo == null){
+            return;
+        }
+
+        Client client = roomInfo.getClientMap().get(clientId);
         if (client == null){
             return;
         }
-        for (String c :allClient.keySet()) {
+        for (String c :roomInfo.getClientMap().keySet()) {
             if (c.equals(clientId)){
                 continue;
             }
-            Client cli = allClient.get(c);
+            Client cli = roomInfo.getClientMap().get(c);
             if (cli != null){
                 MessMgr.sendMessageToClient(cli.getChannel(),ClientCodeEnum.Sprint.getCode(),sprintToString(clientId));
             }
@@ -207,6 +250,7 @@ public class ClientMgr {
         clientObject.put("userName",client.getUsername());
         clientObject.put("id",client.getClientId());
         clientObject.put("userInfo",client.getUserInfo());
+        clientObject.put("IsFriendRoom",client.IsFriendRoom());
 
         return clientObject.toString();
     }

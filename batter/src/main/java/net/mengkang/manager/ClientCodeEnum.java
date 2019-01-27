@@ -2,6 +2,7 @@ package net.mengkang.manager;
 
 public enum ClientCodeEnum {
 
+    heartBeat(0),
     // 别人进入游戏 1
     OtherEnterGame(1),
     // 自己进入游戏 111

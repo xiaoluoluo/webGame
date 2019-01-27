@@ -5,36 +5,57 @@ import net.mengkang.entity.RoomInfo;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by luoxiaosong on 2018/3/18.
  */
 public class ClassRoomMgr {
 
+    private static AtomicLong CONCURRENT_INTEGER = new AtomicLong(0);
+
     // 管理所有的房间
-   private static Map<Long,RoomInfo> roomMap =  new ConcurrentHashMap();
+   private static Map<Integer,RoomInfo> roomMap =  new ConcurrentHashMap();
+
+   // 获取一个可以进入的房间
+   public static RoomInfo getAbleRoom(){
+       if (roomMap.isEmpty()){
+           return null;
+       }
+       for (RoomInfo room:roomMap.values()) {
+           if (room.isNumMax()){
+               continue;
+           }
+           return room;
+       }
+       return null;
+   }
 
 
    //获取房间信息
-    public static  RoomInfo getRoomInfo(Long roomId){
+    public static  RoomInfo getRoomInfo(Integer roomId){
         return roomMap.get(roomId);
     }
 
-    //增加房间
-    public static void addClassRoom(Long roomId, RoomInfo roomInfo){
-        roomMap.put(roomId,roomInfo);
+
+    public static Map<Integer,RoomInfo> getAllRoom(){
+       return roomMap;
     }
 
-    //发消息给房间其他成员
-    public static void sendMessToRoomMember(boolean isTeacher, RoomInfo roomInfo, String message) {
 
-        if (isTeacher && roomInfo.getStudentChannel() != null){
-            // 如果是老师   就给学生发消息
-            roomInfo.getStudentChannel().writeAndFlush(new TextWebSocketFrame(message));
-        }
-        if ((!isTeacher) && roomInfo.getTeacherChannel() != null){
-            // 如果是学生   就给老师发消息
-            roomInfo.getTeacherChannel().writeAndFlush(new TextWebSocketFrame(message));
-        }
+    public static RoomInfo createRoom(){
+        RoomInfo info = new RoomInfo();
+        info.setRoomId(getRoomId());
+        return info;
     }
+
+
+
+    public static int getRoomId(){
+        return (int)CONCURRENT_INTEGER.getAndIncrement();
+    }
+
+
+
+
 }

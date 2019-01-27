@@ -27,7 +27,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     // 本次请求的 code
     private static final String HTTP_REQUEST_STRING = "request";
 
-//    private Client client;
 
     private WebSocketServerHandshaker handshaker;
 
@@ -84,7 +83,6 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 String requestString = parameters.get(HTTP_REQUEST_STRING).get(0);
                 Client client = ClientMgr.createClient(ctx.channel(),requestString);
                 ClientMgr.addClient(client);
-//                ClientMgr.sendMessageToClient(ctx.channel(),client,true);
                 MessMgr.sendMessageToClient(ctx.channel(), ClientCodeEnum.MyselfEnterGame.getCode(),ClientMgr.clientToString(client));
                 ClientMgr.sendMessageToAllClient(ctx.channel(),client);
             }

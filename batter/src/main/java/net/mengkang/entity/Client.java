@@ -14,7 +14,8 @@ public class Client {
 
     private String fromId;
     private String wxId;
-    private long roomId;
+
+    private int IsFriendRoom; // 是否在朋友房间
 
     private Channel channel;
     private String username;
@@ -48,13 +49,16 @@ public class Client {
         this.wxId = wxId;
     }
 
-    public long getRoomId() {
-        return roomId;
+    public int IsFriendRoom() {
+        return IsFriendRoom;
     }
 
-    public void setRoomId(long roomId) {
-        this.roomId = roomId;
+    public void IsFriendRoom(int IsFriendRoom) {
+        this.IsFriendRoom = IsFriendRoom;
     }
+
+
+
 
     public Channel getChannel(){
         return channel;

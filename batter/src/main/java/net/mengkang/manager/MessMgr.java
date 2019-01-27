@@ -80,7 +80,6 @@ public class MessMgr {
     }
 
     public static void sendMessageToClient(Channel channel, int msgCode,String MsgInfo ){
-        //有人移动
         String message = MessMgr.createMessage(0,"",msgCode, MsgInfo);
         channel.writeAndFlush(new TextWebSocketFrame(message));
     }
