@@ -11,6 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Client {
 
     private String clientId;
+
+    private String fromId;
+    private String wxId;
     private long roomId;
 
     private Channel channel;
@@ -26,6 +29,23 @@ public class Client {
 
     public void setClientId(String id) {
         this.clientId = id;
+    }
+
+
+    public String getFromId() {
+        return fromId;
+    }
+
+    public void setFromId(String fromId) {
+        this.fromId = fromId;
+    }
+
+    public String getWxId() {
+        return wxId;
+    }
+
+    public void setWxId(String wxId) {
+        this.wxId = wxId;
     }
 
     public long getRoomId() {

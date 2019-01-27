@@ -1,6 +1,7 @@
 package net.mengkang.manager;
 
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import net.mengkang.entity.Client;
 import org.json.JSONObject;
 
@@ -35,6 +36,11 @@ public class MessMgr {
                 ClientMgr.sendKillOther(channel.id().asLongText(),targetClientId,hp);
                 return;
             }
+
+            case 10003:{
+                ClientMgr.sendUserSprint(channel.id().asLongText());
+                return;
+            }
             case 10102:{
 
 
@@ -55,7 +61,7 @@ public class MessMgr {
         }
     }
 
-    public static String createMessage(int errorCode,String errorMess,long messageId, String message) {
+    public static String createMessage(int errorCode,String errorMess,int messageId, String message) {
         JSONObject msg = new JSONObject();
         msg.put("errorCode",errorCode);
         msg.put("errorMess",errorMess);
@@ -63,7 +69,6 @@ public class MessMgr {
         msg.put("data",message);
         return msg.toString();
     }
-
 
     public static boolean isJson(String content) {
         try {
@@ -73,5 +78,12 @@ public class MessMgr {
             return false;
         }
     }
+
+    public static void sendMessageToClient(Channel channel, int msgCode,String MsgInfo ){
+        //有人移动
+        String message = MessMgr.createMessage(0,"",msgCode, MsgInfo);
+        channel.writeAndFlush(new TextWebSocketFrame(message));
+    }
+
 
 }
