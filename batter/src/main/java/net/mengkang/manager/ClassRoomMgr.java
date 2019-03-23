@@ -1,6 +1,7 @@
 package net.mengkang.manager;
 
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import net.mengkang.entity.Client;
 import net.mengkang.entity.RoomInfo;
 
 import java.util.Map;
@@ -26,6 +27,28 @@ public class ClassRoomMgr {
            if (room.isNumMax()){
                continue;
            }
+           // 如果这两个房间的人是好友邀请过来的 就没有可用的房间
+           String fromWeiXinId = "";
+           String WeiXinId = "";
+           //房间内是否是好友关系
+           boolean isFriend = false;
+          for (Client c :room.getClientMap().values()){
+              if (room.getClientMap().size()>2){
+                  continue;
+              }
+              if (fromWeiXinId== "" && WeiXinId==""){
+                  WeiXinId = c.getWxId();
+                  fromWeiXinId =c.getFromId();
+                  continue;
+              }
+              if (c.getWxId()== fromWeiXinId || c.getFromId()==WeiXinId){
+                  isFriend = true;
+              }
+          }
+          if (isFriend){
+              continue;
+          }
+
            return room;
        }
        return null;
