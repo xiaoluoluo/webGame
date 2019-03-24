@@ -29,9 +29,11 @@ public class ClientMgr {
             if (rooId != null){
                 isFriendRoom = 1;
                 roomInfo = ClassRoomMgr.getRoomInfo(rooId);
-                if (roomInfo.isNumMax()){
+                if (roomInfo != null &&roomInfo.isNumMax() ){
                     return 0;
                 }
+            }else {
+                roomInfo = null;
             }
         }
         if (roomInfo == null || roomInfo.isNumMax()){
