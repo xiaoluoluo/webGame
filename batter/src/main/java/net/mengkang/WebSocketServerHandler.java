@@ -82,8 +82,12 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
                 // 请求字符串
                 String requestString = parameters.get(HTTP_REQUEST_STRING).get(0);
                 Client client = ClientMgr.createClient(ctx.channel(),requestString);
-                ClientMgr.addClient(client);
-                MessMgr.sendMessageToClient(ctx.channel(), ClientCodeEnum.MyselfEnterGame.getCode(),ClientMgr.clientToString(client));
+                Integer err = ClientMgr.addClient(client);
+                int errorCode = 0;
+                if (err <= 0){
+                    errorCode =1;
+                }
+                MessMgr.sendMessageToClient(ctx.channel(), errorCode,ClientCodeEnum.MyselfEnterGame.getCode(),ClientMgr.clientToString(client));
                 ClientMgr.sendMessageToAllClient(ctx.channel(),client);
             }
         }

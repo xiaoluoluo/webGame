@@ -84,5 +84,9 @@ public class MessMgr {
         channel.writeAndFlush(new TextWebSocketFrame(message));
     }
 
+    public static void sendMessageToClient(Channel channel,int errorCode , int msgCode,String MsgInfo ){
+        String message = MessMgr.createMessage(errorCode,"",msgCode, MsgInfo);
+        channel.writeAndFlush(new TextWebSocketFrame(message));
+    }
 
 }

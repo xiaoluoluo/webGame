@@ -19,7 +19,7 @@ public class ClientMgr {
     private static Map<String, Integer> allCidClient = new ConcurrentHashMap<String, Integer>();
 
 
-    public static void addClient(Client client){
+    public static Integer addClient(Client client){
 
         int isFriendRoom = 0;
         RoomInfo roomInfo = ClassRoomMgr.getAbleRoom();
@@ -29,6 +29,9 @@ public class ClientMgr {
             if (rooId != null){
                 isFriendRoom = 1;
                 roomInfo = ClassRoomMgr.getRoomInfo(rooId);
+                if (roomInfo.isNumMax()){
+                    return 0;
+                }
             }
         }
         if (roomInfo == null || roomInfo.isNumMax()){
@@ -40,6 +43,7 @@ public class ClientMgr {
         roomInfo.getClientMap().put(client.getClientId(),client);
         allWxIdClient.put(client.getWxId(),roomInfo.getRoomId());
         allCidClient.put(client.getClientId(),roomInfo.getRoomId());
+        return 1;
     }
 
     public static Client createClient(Channel channel,String requestString){
