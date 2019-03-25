@@ -58,6 +58,8 @@ public class ClientMgr {
         String fromWxId= (String) json.get("fromWxId");
         String wxId= (String) json.get("wxId");
 
+        String otherInfo= (String) json.get("otherInfo");
+
         Client newClient = new Client();
         newClient.setClientId(channel.id().asLongText());
 
@@ -65,8 +67,10 @@ public class ClientMgr {
         newClient.setFromId(fromWxId);
         newClient.setUsername(userName);
         newClient.setUserInfo(userInfo);
+        newClient.setOtherInfo(otherInfo);
         newClient.setHp(hp);
         newClient.setChannel(channel);
+
         return newClient;
     }
 
@@ -257,7 +261,7 @@ public class ClientMgr {
         clientObject.put("id",client.getClientId());
         clientObject.put("userInfo",client.getUserInfo());
         clientObject.put("IsFriendRoom",client.IsFriendRoom());
-
+        clientObject.put("otherInfo",client.getOtherInfo());
         return clientObject.toString();
     }
 

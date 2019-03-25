@@ -21,7 +21,7 @@ public class Client {
     private String username;
     private Integer hp;
     private String userInfo;
-
+    private String otherInfo;
 
 
     public String getClientId() {
@@ -93,4 +93,14 @@ public class Client {
     public void setUserInfo(String userInfo) {
         this.userInfo = userInfo;
     }
+
+    public String getOtherInfo() {
+        return otherInfo;
+    }
+
+    public void setOtherInfo(String otherInfo) {
+        this.otherInfo = otherInfo;
+    }
+
+
 }
