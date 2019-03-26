@@ -35,7 +35,7 @@ public class RoomInfo {
     }
 
     public boolean isNumMax (){
-        return clientMap.size() > roomUserNum;
+        return clientMap.size() >= roomUserNum;
     }
 
     public boolean isEmpty (){
