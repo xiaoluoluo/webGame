@@ -12,7 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RoomInfo {
 
-    private static final int roomUserNum = 4;
+    private static final int roomUserNum = 2;
+    private static final int roomUserInviteNum = 4;
 
     //<cid,Client>
     private Map<String,Client> clientMap = new ConcurrentHashMap<String, Client>(roomUserNum);
@@ -36,6 +37,10 @@ public class RoomInfo {
 
     public boolean isNumMax (){
         return clientMap.size() >= roomUserNum;
+    }
+
+    public boolean isInviteNumMax (){
+        return clientMap.size() >= roomUserInviteNum;
     }
 
     public boolean isEmpty (){
